@@ -16,6 +16,7 @@ import com.laifeng.sopcastsdk.camera.CameraZoomListener;
 import com.laifeng.sopcastsdk.camera.focus.FocusManager;
 import com.laifeng.sopcastsdk.camera.focus.FocusPieView;
 import com.laifeng.sopcastsdk.utils.WeakHandler;
+import com.laifeng.sopcastsdk.video.GLMyViewRenderer;
 import com.laifeng.sopcastsdk.video.MyRenderer;
 
 /**
@@ -29,8 +30,10 @@ import com.laifeng.sopcastsdk.video.MyRenderer;
  */
 public class CameraView extends FrameLayout {
     private Context mContext;
-    protected RenderSurfaceView mRenderSurfaceView;
-    protected MyRenderer mRenderer;
+    //protected RenderSurfaceView mRenderSurfaceView;
+    protected GLTextureSurfaceView mRenderSurfaceView;
+    //protected MyRenderer mRenderer;
+    protected GLMyViewRenderer mRenderer;
     private FocusPieView mFocusHudRing;
     private FocusManager mFocusManager;
     private GestureDetector mGestureDetector;
@@ -67,7 +70,7 @@ public class CameraView extends FrameLayout {
         LayoutInflater mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mInflater.inflate(R.layout.layout_camera_view, this, true);
         mHandler = new WeakHandler();
-        mRenderSurfaceView = (RenderSurfaceView) findViewById(R.id.render_surface_view);
+        mRenderSurfaceView = (GLTextureSurfaceView) findViewById(R.id.render_surface_view);
         mRenderSurfaceView.setZOrderMediaOverlay(isMediaOverlay);
         mRenderer = mRenderSurfaceView.getRenderer();
         mFocusHudRing = (FocusPieView) findViewById(R.id.focus_view);

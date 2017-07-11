@@ -36,6 +36,7 @@ public class PortraitActivity extends Activity {
     private boolean isGray;
     private boolean isRecording;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

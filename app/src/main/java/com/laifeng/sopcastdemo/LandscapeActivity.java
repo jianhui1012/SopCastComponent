@@ -54,6 +54,7 @@ public class LandscapeActivity extends Activity {
     private int mCurrentBps;
     private Dialog mUploadDialog;
     private EditText mAddressET;
+    private String rtmpUrl = "rtmp测试地址";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,7 +149,7 @@ public class LandscapeActivity extends Activity {
         okBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String uploadUrl = mAddressET.getText().toString();
+                String uploadUrl = rtmpUrl;//mAddressET.getText().toString();
                 if(TextUtils.isEmpty(uploadUrl)) {
                     Toast.makeText(LandscapeActivity.this, "Upload address is empty!", Toast.LENGTH_SHORT).show();
                 } else {

@@ -54,7 +54,7 @@ public class LandscapeActivity extends Activity {
     private int mCurrentBps;
     private Dialog mUploadDialog;
     private EditText mAddressET;
-    private String rtmpUrl = "rtmp测试地址";
+    private String rtmpUrl = "rtmp://11635.lsspublish.aodianyun.com/bandtour/stream";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,6 +194,9 @@ public class LandscapeActivity extends Activity {
         mLFLiveView.setCameraOpenListener(new CameraListener() {
             @Override
             public void onOpenSuccess() {
+                mRtmpSender.setAddress(rtmpUrl);
+                mRecordBtn.setBackgroundResource(R.mipmap.ic_record_stop);
+                mRtmpSender.connect();
                 Toast.makeText(LandscapeActivity.this, "camera open success", Toast.LENGTH_LONG).show();
             }
 

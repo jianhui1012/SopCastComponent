@@ -67,6 +67,7 @@ public class CameraLivingView extends CameraView implements GLTextureSurfaceView
         this.stop();
         mRenderer = glMyViewRenderer;
         initView();
+        mStreamController.setVideoConfiguration(mVideoConfiguration);
     }
 
     public interface LivingStartListener {
@@ -77,18 +78,21 @@ public class CameraLivingView extends CameraView implements GLTextureSurfaceView
 
     public CameraLivingView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setCallBackPublish(this);
         initView();
         mContext = context;
     }
 
     public CameraLivingView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setCallBackPublish(this);
         initView();
         mContext = context;
     }
 
     public CameraLivingView(Context context) {
         super(context);
+        setCallBackPublish(this);
         initView();
         mContext = context;
     }
@@ -98,7 +102,7 @@ public class CameraLivingView extends CameraView implements GLTextureSurfaceView
         NormalAudioController audioController = new NormalAudioController();
         mStreamController = new StreamController(videoController, audioController);
         mRenderer.setCameraOpenListener(mCameraOpenListener);
-        setCallBackPublish(this);
+
     }
 
     public void init() {
@@ -115,7 +119,7 @@ public class CameraLivingView extends CameraView implements GLTextureSurfaceView
     }
 
     public boolean setCallBackPublish(GLTextureSurfaceView.CallBackPublishHandler callBackPublishHandler) {
-        if (mRenderer == null)
+        if (mRenderSurfaceView == null)
             return false;
         mRenderSurfaceView.setCallBackPublish(callBackPublishHandler);
         return true;

@@ -279,16 +279,4 @@ public abstract class BaseGLTextureView extends TextureView implements TextureVi
         }
     }
 
-    //设置重新回调
-    private CallBackPublishHandler mCallBackPublishHandler = null;
-
-    public interface CallBackPublishHandler {
-        void handlePause();
-        void handleResume();
-    }
-
-    public void setCallBackPublish(CallBackPublishHandler callBackPublish) {
-        if (callBackPublish != null)
-            mCallBackPublishHandler = callBackPublish;
-    }
 }

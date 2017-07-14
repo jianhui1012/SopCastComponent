@@ -67,9 +67,9 @@ public class GLTextureSurfaceView extends GLTextureView {
                 SopCastLog.d(SopCastConstant.TAG, "SurfaceView destroy");
                 CameraHolder.instance().stopPreview();
                 CameraHolder.instance().releaseCamera();
-                //mRenderer = new GLMyViewRenderer(GLTextureSurfaceView.this);
-                //mRenderer.setEffect(new NullEffect(GLTextureSurfaceView.this.getContext()));
-                //setRenderer(mRenderer);
+                mRenderer = new GLMyViewRenderer(GLTextureSurfaceView.this);
+                setRenderer(mRenderer);
+                mCallBackPublishHandler.handleStopAndInit(mRenderer);
                 return true;
             }
 
@@ -107,6 +107,17 @@ public class GLTextureSurfaceView extends GLTextureView {
         super.surfaceDestroyed();
     }
 
+    public interface CallBackPublishHandler {
+        void handleStopAndInit(GLMyViewRenderer glMyViewRenderer);
+    }
 
+    //设置重新回调
+    private  CallBackPublishHandler mCallBackPublishHandler = null;
+
+    public void setCallBackPublish(CallBackPublishHandler callBackPublish) {
+        if (callBackPublish != null) {
+            mCallBackPublishHandler = callBackPublish;
+        }
+    }
 
 }

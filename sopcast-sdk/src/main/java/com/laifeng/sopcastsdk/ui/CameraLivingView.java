@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.util.AttributeSet;
 
+import com.chillingvan.canvasgl.glview.texture.BaseGLTextureView;
 import com.laifeng.sopcastsdk.camera.CameraData;
 import com.laifeng.sopcastsdk.camera.CameraListener;
 import com.laifeng.sopcastsdk.configuration.AudioConfiguration;
@@ -28,6 +29,7 @@ import com.laifeng.sopcastsdk.stream.sender.Sender;
 import com.laifeng.sopcastsdk.utils.SopCastUtils;
 import com.laifeng.sopcastsdk.utils.SopCastLog;
 import com.laifeng.sopcastsdk.utils.WeakHandler;
+import com.laifeng.sopcastsdk.video.GLMyViewRenderer;
 import com.laifeng.sopcastsdk.video.effect.Effect;
 
 /**
@@ -39,7 +41,7 @@ import com.laifeng.sopcastsdk.video.effect.Effect;
  * @Time 下午5:41
  * @Version
  */
-public class CameraLivingView extends CameraView {
+public class CameraLivingView extends CameraView implements GLTextureSurfaceView.CallBackPublishHandler {
     public static final int NO_ERROR = 0;
     public static final int VIDEO_TYPE_ERROR = 1;
     public static final int AUDIO_TYPE_ERROR = 2;
@@ -60,8 +62,16 @@ public class CameraLivingView extends CameraView {
     private LivingStartListener mLivingStartListener;
     private WeakHandler mHandler = new WeakHandler();
 
+    @Override
+    public void handleStopAndInit(GLMyViewRenderer glMyViewRenderer) {
+        this.stop();
+        mRenderer = glMyViewRenderer;
+        initView();
+    }
+
     public interface LivingStartListener {
         void startError(int error);
+
         void startSuccess();
     }
 
@@ -83,11 +93,12 @@ public class CameraLivingView extends CameraView {
         mContext = context;
     }
 
-    private void initView() {
+    public void initView() {
         CameraVideoController videoController = new CameraVideoController(mRenderer);
         NormalAudioController audioController = new NormalAudioController();
         mStreamController = new StreamController(videoController, audioController);
         mRenderer.setCameraOpenListener(mCameraOpenListener);
+        setCallBackPublish(this);
     }
 
     public void init() {
@@ -101,6 +112,13 @@ public class CameraLivingView extends CameraView {
 
     public void setLivingStartListener(LivingStartListener listener) {
         mLivingStartListener = listener;
+    }
+
+    public boolean setCallBackPublish(GLTextureSurfaceView.CallBackPublishHandler callBackPublishHandler) {
+        if (mRenderer == null)
+            return false;
+        mRenderSurfaceView.setCallBackPublish(callBackPublishHandler);
+        return true;
     }
 
     public void setPacker(Packer packer) {
@@ -130,35 +148,35 @@ public class CameraLivingView extends CameraView {
             SopCastLog.w(TAG, "Android sdk version error");
             return SDK_VERSION_ERROR;
         }
-        if(!checkAec()) {
+        if (!checkAec()) {
             SopCastLog.w(TAG, "Doesn't support audio aec");
             return AUDIO_AEC_ERROR;
         }
-        if(!isCameraOpen()) {
+        if (!isCameraOpen()) {
             SopCastLog.w(TAG, "The camera have not open");
             return CAMERA_ERROR;
         }
         MediaCodecInfo videoMediaCodecInfo = MediaCodecHelper.selectCodec(mVideoConfiguration.mime);
-        if(videoMediaCodecInfo == null) {
+        if (videoMediaCodecInfo == null) {
             SopCastLog.w(TAG, "Video type error");
             return VIDEO_TYPE_ERROR;
         }
         MediaCodecInfo audioMediaCodecInfo = MediaCodecHelper.selectCodec(mAudioConfiguration.mime);
-        if(audioMediaCodecInfo == null) {
+        if (audioMediaCodecInfo == null) {
             SopCastLog.w(TAG, "Audio type error");
             return AUDIO_TYPE_ERROR;
         }
         MediaCodec videoMediaCodec = VideoMediaCodec.getVideoMediaCodec(mVideoConfiguration);
-        if(videoMediaCodec == null) {
+        if (videoMediaCodec == null) {
             SopCastLog.w(TAG, "Video mediacodec configuration error");
             return VIDEO_CONFIGURATION_ERROR;
         }
         MediaCodec audioMediaCodec = AudioMediaCodec.getAudioMediaCodec(mAudioConfiguration);
-        if(audioMediaCodec == null) {
+        if (audioMediaCodec == null) {
             SopCastLog.w(TAG, "Audio mediacodec configuration error");
             return AUDIO_CONFIGURATION_ERROR;
         }
-        if(!AudioUtils.checkMicSupport(mAudioConfiguration)) {
+        if (!AudioUtils.checkMicSupport(mAudioConfiguration)) {
             SopCastLog.w(TAG, "Can not record the audio");
             return AUDIO_ERROR;
         }
@@ -166,10 +184,10 @@ public class CameraLivingView extends CameraView {
     }
 
     private boolean checkAec() {
-        if(mAudioConfiguration.aec) {
-            if(mAudioConfiguration.frequency == 8000 ||
+        if (mAudioConfiguration.aec) {
+            if (mAudioConfiguration.frequency == 8000 ||
                     mAudioConfiguration.frequency == 16000) {
-                if(mAudioConfiguration.channelCount == 1) {
+                if (mAudioConfiguration.channelCount == 1) {
                     return true;
                 }
             }
@@ -184,8 +202,8 @@ public class CameraLivingView extends CameraView {
             @Override
             public void process() {
                 final int result = check();
-                if(result == NO_ERROR) {
-                    if(mLivingStartListener != null) {
+                if (result == NO_ERROR) {
+                    if (mLivingStartListener != null) {
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -197,7 +215,7 @@ public class CameraLivingView extends CameraView {
                     screenOn();
                     mStreamController.start();
                 } else {
-                    if(mLivingStartListener != null) {
+                    if (mLivingStartListener != null) {
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -211,8 +229,8 @@ public class CameraLivingView extends CameraView {
     }
 
     private void chooseVoiceMode() {
-        AudioManager audioManager = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
-        if(mAudioConfiguration.aec) {
+        AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+        if (mAudioConfiguration.aec) {
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             audioManager.setSpeakerphoneOn(true);
         } else {
@@ -228,7 +246,7 @@ public class CameraLivingView extends CameraView {
     }
 
     private void screenOn() {
-        if(mWakeLock != null) {
+        if (mWakeLock != null) {
             if (!mWakeLock.isHeld()) {
                 mWakeLock.acquire();
             }
@@ -236,7 +254,7 @@ public class CameraLivingView extends CameraView {
     }
 
     private void screenOff() {
-        if(mWakeLock != null) {
+        if (mWakeLock != null) {
             if (mWakeLock.isHeld()) {
                 mWakeLock.release();
             }
@@ -281,9 +299,9 @@ public class CameraLivingView extends CameraView {
 
     public void switchCamera() {
         boolean change = CameraHolder.instance().switchCamera();
-        if(change) {
+        if (change) {
             changeFocusModeUI();
-            if(mOutCameraOpenListener != null) {
+            if (mOutCameraOpenListener != null) {
                 mOutCameraOpenListener.onCameraChange();
             }
         }
@@ -314,14 +332,14 @@ public class CameraLivingView extends CameraView {
         @Override
         public void onOpenSuccess() {
             changeFocusModeUI();
-            if(mOutCameraOpenListener != null) {
+            if (mOutCameraOpenListener != null) {
                 mOutCameraOpenListener.onOpenSuccess();
             }
         }
 
         @Override
         public void onOpenFail(int error) {
-            if(mOutCameraOpenListener != null) {
+            if (mOutCameraOpenListener != null) {
                 mOutCameraOpenListener.onOpenFail(error);
             }
         }
@@ -333,7 +351,7 @@ public class CameraLivingView extends CameraView {
     };
 
     private void setAudioNormal() {
-        AudioManager audioManager = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         audioManager.setMode(AudioManager.MODE_NORMAL);
         audioManager.setSpeakerphoneOn(false);
     }
